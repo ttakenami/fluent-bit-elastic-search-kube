@@ -20,6 +20,7 @@ data:
 
     @INCLUDE input-kubernetes.conf
     @INCLUDE filter-kubernetes.conf
+    @INCLUDE filter-containername.conf
     @INCLUDE output-elasticsearch.conf
 
   input-kubernetes.conf: |
@@ -42,19 +43,27 @@ data:
         Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
         Kube_Tag_Prefix     kube.var.log.containers.
         Merge_Log           On
-        Merge_Log_Key       log_processed
+        Merge_Log_Key       data-platform-log
         K8S-Logging.Parser  On
         K8S-Logging.Exclude Off
 
+  filter-containername.conf: |
+    [FILTER]
+        Name grep
+        Match *
+        regex $kubernetes['container_name'] ^(?=.*count|.*nginx).*$
+        
   output-elasticsearch.conf: |
     [OUTPUT]
         Name            es
         Match           *
         Host            ${FLUENT_ELASTICSEARCH_HOST}
         Port            ${FLUENT_ELASTICSEARCH_PORT}
-        Logstash_Format On
+        Logstash_Format Off
         Replace_Dots    On
         Retry_Limit     False
+        Suppress_Type_Name On
+        Index           data-platform-index
 
   parsers.conf: |
     [PARSER]
