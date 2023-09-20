@@ -28,8 +28,14 @@ spec:
           volumeMounts:
             - mountPath: /usr/share/elasticsearch/data
               name: es-data
+            - name: es-config
+              mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+              subPath: elasticsearch.yml
       volumes:
         - name: es-data
+        - name: es-config
+          configMap:
+            name: es-config
 ---
 apiVersion: v1
 kind: Service
